@@ -58,7 +58,7 @@ const sketch = () => {
       const angle = n * Math.PI * params.amp
       // const scale = ((n + 1) / 2) * 30 // this maps
       // const scale = (n * 0.5 + 0.5) * 30 // this maps
-      const scale = math.mapRange(n, -1, 1, 1, 120)
+      const scale = math.mapRange(n, -1, 1, params.scaleMin, params.scaleMax)
 
       context.save()
       context.translate(x, y)
