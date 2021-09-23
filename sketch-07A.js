@@ -1,4 +1,5 @@
 const canvasSketch = require('canvas-sketch')
+const random = require('canvas-sketch-util/random')
 
 const settings = {
   dimensions: [1080, 1080],
@@ -26,7 +27,7 @@ const sketch = ({ context, width, height }) => {
     typeContext.fillStyle = 'black'
     typeContext.fillRect(0, 0, cols, rows)
 
-    fontSize = cols
+    fontSize = cols * 0.65
 
     typeContext.fillStyle = 'white'
     typeContext.font = `${fontSize}px ${fontFamily}`
@@ -51,9 +52,14 @@ const sketch = ({ context, width, height }) => {
     typeContext.restore()
 
     const typeData = typeContext.getImageData(0, 0, cols, rows).data
-    console.log(typeData)
 
-    context.drawImage(typeCanvas, 0, 0)
+    // context.drawImage(typeCanvas, 0, 0)
+
+    context.fillStyle = 'black'
+    context.fillRect(0, 0, width, height)
+
+    context.textBaseline = 'middle'
+    context.textAlign = 'center'
 
     for (let i = 0; i < numCells; i++) {
       const col = i % cols
@@ -67,19 +73,34 @@ const sketch = ({ context, width, height }) => {
       const b = typeData[i * 4 + 2]
       const a = typeData[i * 4 + 3]
 
-      context.fillStyle = `rgb(${r},${g},${b})`
+      const glyph = getGlyph(r)
+
+      context.font = `${cell * 2}px ${fontFamily}`
+      if (Math.random() < 0.1) context.font = `${cell * 4}px ${fontFamily}`
+
+      context.fillStyle = 'white'
 
       context.save()
       context.translate(x, y)
       context.translate(cell * 0.5, cell * 0.5)
       // context.fillRect(0, 0, cell, cell)
-      context.beginPath()
-      context.arc(0, 0, cell * 0.5, 0, Math.PI * 2)
+      context.fillText(glyph, 0, 0)
       context.fill()
 
       context.restore()
     }
   }
+}
+
+const getGlyph = (v) => {
+  if (v < 50) return ''
+  if (v < 100) return 'new'
+  if (v < 150) return 'york'
+  if (v < 200) return 'city'
+
+  const glyphs = '_= /'.split('')
+
+  return random.pick(glyphs)
 }
 
 const keyUpHandler = (e) => {
@@ -94,29 +115,3 @@ const start = async () => {
 }
 
 start()
-
-// const url = 'https://picsum.photos/200'
-
-// const loadMeSomeImage = (url) => {
-//   return new Promise((resolve, reject) => {
-//     const img = new Image()
-//     img.onload = () => resolve(img)
-//     img.onerror = () => reject()
-//     img.src = url
-//   })
-// }
-
-// const start = () => {
-//   loadMeSomeImage(url).then((img) => {
-//     console.log('image width', img.width)
-//   })
-//   console.log('this.line')
-// }
-
-// const start = async () => {
-//   const img = await loadMeSomeImage(url)
-//   console.log('image width', img.width)
-//   console.log('this.line')
-// }
-
-// start()
