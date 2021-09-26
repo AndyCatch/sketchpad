@@ -5,7 +5,7 @@ const math = require('canvas-sketch-util/math')
 const palettes = require('nice-color-palettes')
 
 const settings = {
-  dimensions: [2048, 2048],
+  dimensions: [1080, 1080],
 }
 
 const sketch = () => {
@@ -22,10 +22,15 @@ const sketch = () => {
       for (let y = 0; y < count; y++) {
         const u = count <= 1 ? 0.5 : x / (count - 1) // working in uv space, vals 0...1
         const v = count <= 1 ? 0.5 : y / (count - 1)
+        const radius = Math.abs(random.noise2D(u, v)) * 0.05
+        // You cannot pass a radius with a negative value
+        // To solve wrap in Math.abs
+        const rotation = random.noise2D(u, v)
 
         points.push({
           color: random.pick(palette),
-          radius: Math.abs(random.gaussian() * 0.01),
+          rotation: rotation,
+          radius: radius,
           position: [u, v],
         })
       }
@@ -34,16 +39,15 @@ const sketch = () => {
     return points
   }
 
-  // random.setSeed(2) // This maintains same level of randomness... deterministic
   const points = createGrid().filter(() => random.value() > 0.5)
-  const margin = 600
+  const margin = 160
 
   return ({ context, width, height }) => {
-    context.fillStyle = 'white'
+    context.fillStyle = '#F6F6F6'
     context.fillRect(0, 0, width, height)
 
     points.forEach((data) => {
-      const { position, radius, color } = data // destructuring (!!!)
+      const { position, radius, color, rotation } = data // destructuring (!!!)
       const [u, v] = position
 
       const x = math.lerp(margin, width - margin, u)
@@ -53,6 +57,14 @@ const sketch = () => {
       context.arc(x, y, radius * width, 0, Math.PI * 2, false)
       context.fillStyle = color
       context.fill()
+
+      // context.save()
+      // context.fillStyle = color
+      // context.font = `${radius * width}px "Helvetica"`
+      // context.translate(x, y)
+      // context.rotate(rotation)
+      // context.fillText('=', 0, 0)
+      // context.restore()
     })
   }
 }
