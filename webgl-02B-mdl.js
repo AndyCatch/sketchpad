@@ -11,7 +11,7 @@ const BezierEasing = require('bezier-easing')
 const glslify = require('glslify')
 
 const settings = {
-  dimensions: [512, 512],
+  dimensions: [1080, 1080],
   fps: 24,
   // sets loop
   duration: 4,
@@ -29,7 +29,7 @@ const sketch = ({ context }) => {
   })
 
   // WebGL background color
-  renderer.setClearColor('hsl(0,0%,15%)', 1)
+  renderer.setClearColor('hsl(0,0%,5%)', 1)
 
   // Setup a camera
   const camera = new THREE.OrthographicCamera()
@@ -40,35 +40,48 @@ const sketch = ({ context }) => {
   const palette = random.pick(palettes)
 
   // Setup a geometry
-  const geometry = new THREE.BoxGeometry(1, 1, 1)
+  const geometry = new THREE.SphereGeometry(1, 32, 32)
 
-  const fragmentShader = /*glsl*/ `
+  const fragmentShader = glslify(/*glsl*/ `
   varying vec2 vUv;
+
+  #pragma glslify: noise = require('glsl-noise/simplex/3d');
+
   uniform vec3 color;
+  uniform float playhead;
 
   void main() {
-    gl_FragColor = vec4(vec3(color * vUv.x),1.0);  
+    float offset = 0.3 * noise(vec3(vUv.xy * 10.0, playhead));
+
+    gl_FragColor = vec4(vec3(color * vUv.x + offset), 1.0);  
   }
-  `
+  `)
 
   const vertexShader = glslify(/*glsl*/ `
   varying vec2 vUv; //varyings set from GLSL
 
-  uniform float time; // uniforms set from JS
+  uniform float playhead; // uniforms set from JS
 
   #pragma glslify: noise = require('glsl-noise/simplex/4d');
 
   void main(){
     vUv = uv;
-    vec3 pos = position.xyz * sin(time) + 0.5;
-    pos += noise(vec4(position.xyz, time)) * 1.0;
+    
+    vec3 pos = position.xyz;
+
+    // Multiple layers of noise
+    pos += 0.35 * normal * noise(vec4(pos.xyz * 1.0, playhead));
+    // pos += 0.25 * normal * noise(vec4(pos.xyz * 1.0, playhead));
+    // pos += 0.05 * normal * noise(vec4(pos.xyz * 100.0, 0.0));
+
+
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
   `)
 
   // Setup a mesh with geometry + material
   const meshes = []
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 10; i++) {
     const mesh = new THREE.Mesh(
       geometry,
       // Setup a material
@@ -77,21 +90,21 @@ const sketch = ({ context }) => {
         vertexShader,
         uniforms: {
           color: { value: new THREE.Color(random.pick(palette)) },
-          time: { value: 0 }, // this time val needs updating in render func
+          playhead: { value: 0 }, // this time val needs updating in render func
         },
       })
     )
     mesh.position.set(
-      random.range(-1, 1),
-      random.range(-1, 1),
-      random.range(-1, 1)
+      random.range(-0.5, 0.5),
+      random.range(-0.5, 0.5),
+      random.range(-0.5, 0.5)
     )
     mesh.scale.set(
       random.range(-1, 1),
       random.range(-1, 1),
       random.range(-1, 1)
     )
-    mesh.scale.multiplyScalar(0.5)
+    mesh.scale.multiplyScalar(0.95)
     scene.add(mesh)
 
     meshes.push(mesh)
@@ -135,14 +148,14 @@ const sketch = ({ context }) => {
       camera.updateProjectionMatrix()
     },
     // Update & render your scene here
-    render({ playhead, time }) {
+    render({ playhead }) {
       // Rotate scene
       // scene.rotation.y = playhead * Math.PI * 2 // sets the rotation at a full circle
       t = Math.sin(playhead * Math.PI)
       scene.rotation.z = easeFn(t) // Custom ease function
 
       meshes.forEach((mesh) => {
-        mesh.material.uniforms.time.value = time
+        mesh.material.uniforms.playhead.value = playhead
       })
 
       renderer.render(scene, camera)

@@ -21,13 +21,13 @@ const frag = glsl(/* glsl */ `
   #pragma glslify: hsl2rgb = require('glsl-hsl2rgb');
 
   void main () {
-    // vec3 colorA = sin(time / 2.0) + vec3(1.0, 0.0, 0.0);
-    // vec3 colorB = vec3(1.0, 0.0 ,1.0);
+    // vec3 colorA = sin(time / 2.0) + vec3(0.075,0.333,0.996); // GS Vivid Blue
+    // vec3 colorB = vec3(0.361,0.925,0.784); // GS Teal
 
     vec2 center = vUv - 0.5;
     center.x *= aspect;
 
-    float dist = length(center); // length is the magnitude of a vector
+    float dist = length(center * 0.6); // length is the magnitude of a vector
 
     // float alpha = step(dist, 0.25);
     // // the closer the min/max values are, the lesss of a falloff we get
@@ -59,7 +59,7 @@ const frag = glsl(/* glsl */ `
 const sketch = ({ gl }) => {
   // Create the shader and return it
   return createShader({
-    clearColor: 'white', // false makes it transparent
+    clearColor: 'black', // false makes it transparent
     // Pass along WebGL context
     gl,
     // Specify fragment and/or vertex shader strings
