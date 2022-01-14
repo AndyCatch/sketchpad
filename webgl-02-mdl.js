@@ -11,7 +11,7 @@ const eases = require('eases')
 const BezierEasing = require('bezier-easing')
 
 const settings = {
-  dimensions: [512, 512],
+  dimensions: [1048 , 1048],
   fps: 24,
   // sets loop
   duration: 4,
@@ -48,7 +48,7 @@ const sketch = ({ context }) => {
   // })
 
   // Setup a mesh with geometry + material
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 4; i++) {
     const mesh = new THREE.Mesh(
       geometry,
       new THREE.MeshStandardMaterial({
@@ -65,7 +65,7 @@ const sketch = ({ context }) => {
       random.range(-1, 1),
       random.range(-1, 1)
     )
-    mesh.scale.multiplyScalar(0.5)
+    mesh.scale.multiplyScalar(1.5)
     scene.add(mesh)
   }
 
