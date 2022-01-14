@@ -4,10 +4,11 @@ const random = require('canvas-sketch-util/random')
 
 const settings = {
   dimensions: [1080, 1080],
+  animate:false
 }
 
 const sketch = () => {
-  return ({ context, width, height }) => {
+  return ({ context, width, height, frame }) => {
     context.fillStyle = 'black'
     context.fillRect(0, 0, width, height)
     context.fillStyle = 'white'
@@ -23,10 +24,11 @@ const sketch = () => {
     const numShapes = 12
     const radius = width * 0.3
 
+    
     for (let i = 0; i < numShapes; i++) {
       const slice = math.degToRad(360 / numShapes)
       const angle = slice * i
-
+      
       x = cx + radius * Math.sin(angle)
       y = cy + radius * Math.cos(angle)
 
@@ -44,7 +46,7 @@ const sketch = () => {
       context.translate(cx, cy)
       context.rotate(-angle)
 
-      context.lineWidth = random.range(5, 20)
+      context.lineWidth =  5 //random.range(5, 20)
 
       context.beginPath()
       context.arc(
