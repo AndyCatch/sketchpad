@@ -176,7 +176,7 @@ const sketch = ({ context }) => {
 			camera.updateProjectionMatrix()
 		},
 		// Update & render your scene here
-		// To set up a seamless loop... pass in playhead
+		// To set up a seamless loop... pass in playhead, multiply by Math.PI * 2
 		render({ time, playhead }) {
 			mesh.rotation.y = playhead * Math.PI * 2
 			material.uniforms.time.value = time
