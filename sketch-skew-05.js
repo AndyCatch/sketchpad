@@ -5,12 +5,17 @@ const Color = require('canvas-sketch-util/color')
 const paper = require('paper-colors')
 const riso = require('riso-colors')
 
+const seed = random.getRandomSeed()
+
 const settings = {
 	dimensions: [1080, 1080],
 	animate: true,
+	name: seed,
 }
 
 const sketch = ({ context, width, height }) => {
+	random.setSeed(seed) // setting a seed value, ensures a consistent result
+
 	// variables declared outside the return (render/draw)
 	// function only need to be declared once
 	let x, y, w, h, fill, stroke, blend
@@ -18,10 +23,20 @@ const sketch = ({ context, width, height }) => {
 	const num = 40
 	const degrees = -30
 	const paperColor = random.pick(paper).hex
+	const strokeColor = Color.offsetHSL(paperColor, 0, 0, -4)
+
+	console.log(strokeColor)
 
 	const rects = []
 
 	const rectColors = [random.pick(riso).hex, random.pick(riso).hex]
+
+	const mask = {
+		radius: width * 0.3,
+		sides: 8,
+		x: width * 0.5,
+		y: height * 0.5,
+	}
 
 	for (let i = 0; i < num; i++) {
 		x = random.range(0, width)
@@ -42,11 +57,18 @@ const sketch = ({ context, width, height }) => {
 		context.fillStyle = paperColor
 		context.fillRect(0, 0, width, height)
 
+		context.save()
+		context.translate(mask.x, mask.y)
+
+		drawPolygon({ context, radius: mask.radius, sides: mask.sides })
+		context.clip()
+
 		rects.forEach((rect) => {
 			const { x, y, w, h, fill, stroke, blend } = rect
 			let shadowColor
 
 			context.save()
+			context.translate(-mask.x, -mask.y)
 			context.translate(x, y)
 			context.strokeStyle = stroke
 			context.fillStyle = fill
@@ -66,9 +88,22 @@ const sketch = ({ context, width, height }) => {
 
 			context.shadowColor = null
 			context.stroke()
-
 			context.restore()
 		})
+
+		context.restore()
+
+		// polygon outline
+		context.save()
+		context.translate(mask.x, mask.y)
+
+		drawPolygon({ context, radius: mask.radius, sides: mask.sides })
+		context.lineWidth = 2
+
+		context.strokeStyle = strokeColor.hex
+		context.stroke()
+
+		context.restore()
 	}
 }
 
@@ -86,6 +121,20 @@ const drawSkewedRect = ({ context, w = 600, h = 200, degrees = -45 }) => {
 	context.lineTo(0, h)
 	context.closePath()
 	context.restore()
+}
+
+const drawPolygon = ({ context, radius = 100, sides = 3 }) => {
+	const slice = (Math.PI * 2) / sides
+
+	context.beginPath()
+	context.moveTo(0, -radius)
+
+	for (let i = 1; i < sides; i++) {
+		const theta = i * slice - Math.PI * 0.5
+		context.lineTo(Math.cos(theta) * radius, Math.sin(theta) * radius)
+	}
+
+	context.closePath()
 }
 
 canvasSketch(sketch, settings)
