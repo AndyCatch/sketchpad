@@ -25,8 +25,6 @@ const sketch = ({ context, width, height }) => {
 	const paperColor = random.pick(paper).hex
 	const strokeColor = Color.offsetHSL(paperColor, 0, 0, -4)
 
-	console.log(strokeColor)
-
 	const rects = []
 
 	const rectColors = [random.pick(riso).hex, random.pick(riso).hex]
