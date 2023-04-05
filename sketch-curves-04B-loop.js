@@ -12,10 +12,10 @@ const settings = {
 
 const TWO_PI = 2 * Math.PI
 
-const sketch = ({ width, height, fps, duration, playhead }) => {
-	let numFrames = fps * duration
-	let radius = 500
+let numFrames = settings.fps * settings.duration
+let radius = 250
 
+const sketch = ({ width, height, playhead }) => {
 	const cols = 72
 	const rows = 8
 	const numCells = cols * rows
@@ -75,19 +75,19 @@ const sketch = ({ width, height, fps, duration, playhead }) => {
 
 		// update positions
 		points.forEach((point) => {
-			// n = random.noise2D(
-			// 	point.ix + radius * Math.cos(TWO_PI * t),
-			// 	point.iy + radius * Math.sin(TWO_PI * t),
-			// 	frequency,
-			// 	amplitude
-			// )
-			n = random.noise3D(
+			n = random.noise2D(
 				point.ix + radius * Math.cos(TWO_PI * t),
 				point.iy + radius * Math.sin(TWO_PI * t),
-				playhead,
 				frequency,
 				amplitude
 			)
+			// n = random.noise3D(
+			// 	point.ix + radius * Math.cos(TWO_PI * t),
+			// 	point.iy + radius * Math.sin(TWO_PI * t),
+			// 	playhead,
+			// 	frequency,
+			// 	amplitude
+			// )
 			point.x = point.ix + n
 			point.y = point.iy + n
 		})
